@@ -30,12 +30,39 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 SERVICE_ACCOUNT_INFO = {
 
+}
+
 # Authenticate with Google Sheets API
 scope = ['https://spreadsheets.google.com/feeds',
          'https://www.googleapis.com/auth/drive']
 creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_INFO, scope)
 client = gspread.authorize(creds)
+## 구글 시트에 저장!!
+save_data = {"computer_name" : user_id
+                , "computer_ip" : my_public_ip
+                ,"starting_time" : time.strftime('%Y%m%d-%H%M%S', time.localtime()) }
 
+spreadsheet = client.open('active_monitoring_usage')
+worksheet = spreadsheet.worksheet('result')
+# 데이터 추가
+# 빈 리스트 생성
+save_data_list = []
+
+# 각 인덱스별로 데이터 묶기
+row = [
+    save_data['computer_name'],
+    save_data['computer_ip'],
+    save_data['STOP_THRESHOLD'],
+    save_data['final_stop_time']
+]
+save_data_list.append(row)
+
+worksheet.append_rows(
+    save_data_list,
+    value_input_option='USER_ENTERED'  # 데이터를 사람이 입력한 것처럼 처리
+)
+print("Rows appended successfully!")
+print(f"save me to sheets {save_data}")
 # Callback functions for mouse events
 def on_mouse_move(x, y):
     global last_activity_time
